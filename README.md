@@ -9,72 +9,53 @@ This lab is dedicated to simulating a real Cyber Attack and endpoint detection a
 The first step to the lab is setting up both machines. The attack machine will run on Ubuntu Server, and the endpoint will be running Windows 11. In order for this lab to work smoothly Microsoft Defender should be turned off (along with other settings). I am also going to be installing Sliver on the Ubuntu machine as my primary attack tool, and setting up LimaCharlie on the Windows machine as an EDR solution. LimaCharlie will have a sensor linked to the windows machine, and will be importing sysmon logs.
 
 <img src="https://i.imgur.com/C16urUV.png">
-<img src="https://imgur.com/a/6foi0qp">
+<img src="https://i.imgur.com/jtFipvD.png">
+<img src="https://i.imgur.com/PRz4Fmi.png">
+<img src="https://i.imgur.com/JjncUXW.png">
 
-# Architecture Before Hardening
 
-In the "BEFORE" stage of the project, all resources were initially deployed with the hope that attraction would be gained from the public internet. The Virtual Machine had its Network Security Groups (NSGs) and built-in firewalls wide open, allowing unrestricted access from any source. This machines was then left to the public for 24 hours to generate the following attack maps mentioned earler.
 
-<b> Using KQL Quesries i extracted logs from MS Sentinel to present the result of attacks on our Machine and location it came from</b>
+# The Attacks, and the Defense
 
-<img src="https://i.imgur.com/ctQqArh.png">
+The first step is to generate our payload on Sliver, and implant the malware into the Windows host machine. Then we can create a command and control session after the malware is executed on the endpoint.
 
-<b> Next i Plotted this information to create an attack map that showcases RDP failures against the Windows machine.</b>
+<img src="https://i.imgur.com/qqFPVFL.png">
+<img src="https://i.imgur.com/0oAYil6.png">
+<img src="https://i.imgur.com/rGSAtK6.png">
+<hr>
+Now that we have a live session between the two machines, the attack machine can begin peeking around, checking priveleges, getting host information, and checking what type of security the host has.
 
-<img src="https://i.imgur.com/K6Xj5NO.png">
+<img src="https://i.imgur.com/Jh0RacS.png">
+<img src="https://i.imgur.com/20BbPrG.png">
+<hr>
+On the host machine we can look inside our LimaCharlie SIEM and see telemetry from the attacker. We can identify the payload thats running and see the IP its connected to.
 
-# After Hardening Measures and Security Controls
+<img src="https://i.imgur.com/3Jpyw7i.png">
+<img src="https://i.imgur.com/JNb0W8w.png">
+<img src="https://i.imgur.com/z9c4pkS.png">
+<hr>
+We can also use LimaCharlie to scan the hash of the payload through VirusTotal; however, it will be clean since we just created the payload ourselves.
+<img src="https://i.imgur.com/tQVLaP1.png">
+<img src="https://i.imgur.com/sZyhrAb.png">
+<hr>
+Now on the attack machine we can simulate an attack to steal credentials by dumping the LSASS memory. In LimaCharlie we can check the sensors, observe the telemetry, and write rules to detect the sensitive process.
 
-In the "AFTER" stage, based off the incidents created from the "Before" 24 hour capture, I implemented hardening measures and security controls to improve the environment's security from attackers.
-These improvements included:
+<img src="https://i.imgur.com/mIYGpbK.png">
+<img src="https://i.imgur.com/fM2sXhe.png">
+<hr>
 
-- Built-in Firewalls: In my virtual machines I configured the built-in firewalls so that it would deny access from unauthorized users.
+Now instead of simply detection, we can practice using LimaCharlie to write a rule that will detect and block the attacks coming from the Sliver server. On the Ubuntu machine we can simulate parts of a ransomware attack, by attempting to delete the volume shadow copies. In LimaCharlie we can view the telemetry and then write a rule that will block the attack entirely. After we create the rule in our SIEM, the Ubuntu machine will have no luck trying the same attack again.
 
-<i>All map queries actually returned no results due to no instances of malicious activity for the 24 hour period after hardening.</i>
 
-# Metrics Before Hardening / Security Controls
+<img src="https://i.imgur.com/0PHRQmE.png">
+<img src="https://i.imgur.com/rpOYuEW.png">
+<img src="https://i.imgur.com/ljJsuhR.png">
+<img src="https://i.imgur.com/49RYl58.png">
 
-The following table shows the metrics I measured in the secure environment for 24 hours:
 
-SecurityEvent count on our Windows machine was	2087. After implementing security features to harden our environment, the count went down to 975. No failed login attempts were recorded.
-
-# Utilizing NIST 800.61r2 Computer Incident Handling Guide
-
-For each simulated attack I practiced incident responses following NIST SP 800-61 r2.
-
-<img src="https://i.imgur.com/VUxp3ZA.png">
-
-Each organization will have policies related to an incident response that should be followed. This event is just a walkthrough for possible actions to take in the detection of malware on a workstation.
-
-# Preparation
-
-The Azure lab was set up to ingest all of the logs into Log Analytics Workspace, Sentinel and Defender were configured, and alert rules were put in place.
-
-# Detection & Analysis
-
-- Malware has been detected on a workstation with the potential to compromise the confidentiality, integrity, or availability of the system and data.
-- Assigned alert to an owner, set the severity to "High", and the status to "Active"
-- Identified the primary user account of the system and all systems affected.
-- A full scan of the system was conducted using up-to-date antivirus software to identify the malware.
-- Verified the authenticity of the alert as a "True Positive".
-- Sent notifications to appropriate personnel as required by the organization's communication policies.
-
-# Containment, Eradication & Recovery
-
-- The infected system and any additional systems infected by the malware were quarantined.
-- If the malware was unable to be removed or the system sustained damage, the system would have been shut down and disconnected from the network.
--Depending on organizational policies the affected systems could be restored known clean state, such as a system image or a clean installation of the operating system and applications. Or an up-to-date anti-virus solution could be used to clean the systems.
-
-# Post-Incident Activity
-
-- In this simulated case, an employee had downloaded a game that contained malware.
-- All information was gathered and analyzed to determine the root cause, extent of damage, and effectiveness of the response.
-- Report disseminated to all stakeholders.
-- Corrective actions are implemented to remediate the root cause.
-- And a lessons-learned review of the incident was conducted.
 
 # Conclusion
 
-In this project, a Honeypot was deployed in Microsoft Azure and log sources were integrated into a Log Analytics workspace. Microsoft Sentinel was employed to trigger alerts and create incidents based on the ingested logs. Additionally, metrics were measured in the insecure environment before security controls were applied, and then again after implementing security measures. The significant reduction in security events and incidents following the implementation of security controls highlights their effectiveness in safeguarding the environment.
+This home lab project effectively demonstrates a simulated cyber attack and defense scenario using virtual machines and specific tools: Sliver as the C2 framework on an Ubuntu server, and LimaCharlie as the EDR solution on a Windows 11 endpoint. Following Eric Capuano's guide, we set up the environment, disabled default security measures, and conducted various attack simulations to test the effectiveness of LimaCharlie.
 
-It is worth noting that if the resources within the network were heavily utilized by regular users, it is likely that more security events and alerts may have been generated within the 24-hour period following the implementation of the security controls.
+<br>This exercise provided practical experience in both offensive and defensive cybersecurity measures, showcasing the importance of EDR solutions in detecting and responding to cyber threats. By simulating real-world attacks and defenses, we gained valuable insights into the dynamics of endpoint security and incident response.
