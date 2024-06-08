@@ -1,4 +1,4 @@
-# EDR Home Lab Attack and Defense
+# EDR | Attack and Defense
 
 # <b>Project</b>
 
