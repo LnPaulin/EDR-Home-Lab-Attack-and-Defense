@@ -10,7 +10,7 @@ The first step to the lab is setting up both machines. The attack machine will r
 
 <img src="https://i.imgur.com/C16urUV.png">
 <img src="https://i.imgur.com/jtFipvD.png">
-<img src="https://i.imgur.com/PRz4Fmi.png">
+<img src="https://i.imgur.com/S15Kmaf.png">
 <img src="https://i.imgur.com/JjncUXW.png">
 
 
